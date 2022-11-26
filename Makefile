@@ -1,0 +1,32 @@
+CXX=g++
+CXXFLAGS=-g -Wall -std=c++11 
+GTESTINCL := -I /usr/include/gtest/  
+GTESTLIBS := -lgtest -lgtest_main  -lpthread
+# Uncomment for parser DEBUG
+#DEFS=-DDEBUG
+
+
+all: ht-test ht-perf str-hash-test hash_check boggle-driver 
+
+boggle-driver: boggle.cpp boggle.h boggle-driver.cpp
+	$(CXX) $(CXXFLAGS) $(DEFS) boggle.cpp boggle-driver.cpp -o $@
+
+ht-test: ht-test.cpp ht.h
+	$(CXX) $(CXXFLAGS) $(DEFS) $< -o $@
+
+# enable optimizations for performance tests with -O3
+ht-perf: ht-perf.cpp ht.h
+	$(CXX) -Wall -std=c++11 -O3 $(DEFS) $< -o $@
+
+str-hash-test: str-hash-test.cpp hash.h
+	$(CXX) $(CXXFLAGS) $(DEFS) $< -o $@
+	mv -f str-hash-test str-hash-test-sol
+
+hash-check: hash-check.cpp hash.h
+	$(CXX) $(CXXFLAGS) $(DEFS) $(GTESTINCL) $< -o $@ $(GTESTLIBS)
+
+run-hash-check: hash-check
+	valgrind --tool=memcheck --leak-check=yes ./hash-check
+
+clean:
+	rm -f *~ *.o ht-test ht-perf str-hash-test hash-check boggle-driver
